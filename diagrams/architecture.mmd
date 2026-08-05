@@ -1,0 +1,15 @@
+flowchart TD
+    A[User: natural language input] --> B[Planner Agent<br/>Gemini]
+    B --> C{Validator<br/>schema + guardrails}
+    C -->|invalid| E[Rejected with reason<br/>logged, not scheduled]
+    C -->|valid| F[Reviewer Agent<br/>Gemini]
+    F -->|issues found, retry max 1| B
+    F -->|approved| D[Adapter<br/>dicts to Task objects]
+    D --> G[Greedy Scheduler<br/>existing PawPal+ logic]
+    G --> H[DailyPlan output]
+    B -.trace.-> L[(logs/agent_trace.jsonl)]
+    C -.trace.-> L
+    F -.trace.-> L
+    G -.trace.-> L
+    L --> I[Eval Harness]
+    I --> J[Human review<br/>documented in model_card.md]
